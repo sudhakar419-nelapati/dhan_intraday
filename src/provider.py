@@ -74,7 +74,7 @@ class DhanAPIProvider:
             # This is a placeholder; actual format needs Dhan documentation
             security_id = f"{symbol}-FUT-{expiry}"
             
-            url = f"{self.BASE_URL}/v2/quotes/intraday"
+            url = f"{self.BASE_URL}/v1/quotes/intraday"
             params = {
                 "securityId": security_id,
                 "mode": "LTP",
@@ -123,7 +123,7 @@ class DhanAPIProvider:
             OptionChainSnapshot object or None if error
         """
         try:
-            url = f"{self.BASE_URL}/v2/quotes/option_chain"
+            url = f"{self.BASE_URL}/v1/quotes/option_chain"
             params = {
                 "symbol": symbol,
                 "expiry": expiry,
@@ -218,7 +218,7 @@ class DhanAPIProvider:
         """
         candles = []
         try:
-            url = f"{self.BASE_URL}/v2/historical/candles"
+            url = f"{self.BASE_URL}/v1/historical/candles"
             params = {
                 "symbol": symbol,
                 "expiry": expiry,
@@ -256,7 +256,7 @@ class DhanAPIProvider:
     def test_connection(self) -> bool:
         """Test API connectivity and credentials."""
         try:
-            url = f"{self.BASE_URL}/v2/user/account"
+            url = f"{self.BASE_URL}/v1/user/account"
             response = self._retry_request("GET", url)
             return response is not None
         except Exception as e:
