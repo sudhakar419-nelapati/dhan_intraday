@@ -1,0 +1,221 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     DHAN API Integration Architecture                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                           YOUR DHAN ACCOUNT                                │
+│                      (API Key + Client ID)                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+                    .env file (Local Configuration)
+                    ┌─────────────────────────────┐
+                    │ DHAN_API_KEY=xxxxx          │
+                    │ DHAN_CLIENT_ID=xxxxx        │
+                    │ API_TIMEOUT_SECONDS=10      │
+                    │ API_RETRY_COUNT=3           │
+                    └─────────────────────────────┘
+                                    ↓
+         ╔═════════════════════════════════════════════════╗
+         ║      STAR Trading Scanner Application           ║
+         ║      (Python + Streamlit)                       ║
+         ╠═════════════════════════════════════════════════╣
+         ║                                                  ║
+         ║  ┌─────────────────────────────────────────┐   ║
+         ║  │  src/provider.py (DhanProvider)         │   ║
+         ║  │  • Authenticates with DHAN API          │   ║
+         ║  │  • Implements retry logic               │   ║
+         ║  │  • Handles timeouts & errors            │   ║
+         ║  │  • Methods:                             │   ║
+         ║  │    - get_futures_candle()               │   ║
+         ║  │    - get_option_chain()                 │   ║
+         ║  │    - test_connection()                  │   ║
+         ║  └─────────────────────────────────────────┘   ║
+         ║                     ↓                            ║
+         ║  ┌─────────────────────────────────────────┐   ║
+         ║  │  src/gates.py (Gate Calculations)       │   ║
+         ║  │  • Gate 7: Futures Analysis             │   ║
+         ║  │  • Gate 8: Session Accumulation         │   ║
+         ║  │  • Gates 1-6: Options Chain Analysis    │   ║
+         ║  │  • Readiness Determination              │   ║
+         ║  └─────────────────────────────────────────┘   ║
+         ║                     ↓                            ║
+         ║  ┌─────────────────────────────────────────┐   ║
+         ║  │  src/database.py (SQLite Persistence)   │   ║
+         ║  │  • 7 tables (candles, gates, results)   │   ║
+         ║  │  • CRUD operations                      │   ║
+         ║  │  • Session state recovery               │   ║
+         ║  │  • Audit logging                        │   ║
+         ║  └─────────────────────────────────────────┘   ║
+         ║                     ↓                            ║
+         ║  ┌─────────────────────────────────────────┐   ║
+         ║  │  dashboard.py (Streamlit Web UI)        │   ║
+         ║  │  5 Tabs:                                │   ║
+         ║  │  1. API Test (Test connection)          │   ║
+         ║  │  2. Market Scanner (All stocks)         │   ║
+         ║  │  3. Stock Detail (5-min analysis)       │   ║
+         ║  │  4. Logs & Diagnostics                  │   ║
+         ║  │  5. Settings (Config management)        │   ║
+         ║  └─────────────────────────────────────────┘   ║
+         ║                                                  ║
+         ╚═════════════════════════════════════════════════╝
+                                    ↓
+                    ┌─────────────────────────────┐
+                    │  Your Web Browser            │
+                    │  http://localhost:8501       │
+                    │                              │
+                    │  ✅ View live market data    │
+                    │  ✅ Check gate calculations  │
+                    │  ✅ Monitor scanner          │
+                    └─────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           QUICK START FLOW                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+STEP 1: Setup Credentials
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    $ copy .env.example .env
+    $ notepad .env
+    
+    Edit:
+    DHAN_API_KEY=your_actual_key_here
+    DHAN_CLIENT_ID=your_actual_id_here
+    
+    Save and close
+
+
+STEP 2: Test API Connection
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    $ python test_api.py
+    
+    Expected output:
+    ✅ API Connection: SUCCESS
+    Sample Futures Data:
+    Symbol        Close        Volume    OI
+    RELIANCE      ₹2,750.50    125,000   15,00,000
+    TCS           ₹3,420.25    85,000    8,50,000
+
+
+STEP 3: Launch Interactive Dashboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    $ streamlit run dashboard.py
+    
+    Browser opens at: http://localhost:8501
+    
+    Click "API Test" tab to:
+    ✅ Test connection with one click
+    ✅ Fetch live futures data
+    ✅ Fetch options chain data
+
+
+STEP 4: View Market Data
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    Dashboard Tabs:
+    
+    📊 Market Scanner
+       └─ All NSE F&O stocks ranked by STAR gates
+    
+    📈 Stock Detail
+       └─ 5-minute candles, charts, full checklist
+    
+    🔗 API Test
+       └─ Test connection, fetch any symbol/strike
+    
+    📝 Logs & Diagnostics
+       └─ API call history, system health
+    
+    ⚙️  Settings
+       └─ Configure thresholds, API retry, features
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     FILES YOU NEED TO USE                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+For Setup & Testing:
+  • DHAN_API_QUICK_START.md ← READ THIS FIRST! (5 min setup)
+  • API_SETUP_GUIDE.md       ← Detailed reference
+  • test_api.py              ← Command-line quick test
+
+For Interactive Testing:
+  • dashboard.py             ← Run: streamlit run dashboard.py
+  • http://localhost:8501    ← Click "API Test" tab
+
+Configuration:
+  • .env                     ← Your API credentials (create from .env.example)
+  • .env.example             ← Reference template
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     DATA FLOW EXAMPLE                                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+You enter:
+  Symbol = "RELIANCE"
+  Expiry = "27NOV2026"
+           ↓
+App makes API call:
+  GET https://api.dhan.co/v2/marketData/fno/historical/
+  Params: securityId="RELIANCE27NOV2026FUT", interval="5min"
+           ↓
+DHAN API returns JSON:
+  {
+    "open": 2750.50,
+    "high": 2755.00,
+    "low": 2745.75,
+    "close": 2752.25,
+    "volume": 125000,
+    "oi": 15000000,
+    "timestamp": "2026-11-17T10:30:00"
+  }
+           ↓
+App stores in SQLite:
+  futures_candles table
+           ↓
+Dashboard displays:
+  Close: ₹2,752.25
+  Volume: 125,000
+  OI: 15,00,000
+           ↓
+Gate calculations run:
+  Gate 7: Futures direction UP, OI strength 1.45x (STRONG)
+  Gate 8: Session BULL lead +2.8L
+           ↓
+Readiness determined:
+  CE: 6/8 passes → Half-qty trade
+  PE: 4/8 passes → Wait for setup
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     TROUBLESHOOTING QUICK REFERENCE                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+❌ "API Connection: FAILED"
+   → Check DHAN_API_KEY in .env
+   → Check DHAN_CLIENT_ID in .env
+   → Verify no spaces/typos
+   → Check internet connectivity
+
+❌ "No data returned"
+   → Market closed? (Test 09:15-15:30 IST, Mon-Fri)
+   → Wrong symbol? (Must be NSE F&O, e.g., RELIANCE)
+   → Wrong expiry? (Must be existing, e.g., 27NOV2026)
+
+❌ "Module not found"
+   → Run: pip install -r requirements.txt
+   → Run: python test_api.py
+
+❌ Streamlit won't open
+   → Run: streamlit run dashboard.py --server.port=8501
+   → Open browser to: http://localhost:8501
+
+
+For more help, see: DHAN_API_QUICK_START.md or API_SETUP_GUIDE.md

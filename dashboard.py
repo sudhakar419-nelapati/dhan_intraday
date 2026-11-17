@@ -192,6 +192,164 @@ def render_stock_detail():
             st.metric("LU", f"{session_data['LU (Long Unwinding)']:.1f}L")
 
 
+def render_api_test():
+    """Render API test and connectivity view."""
+    st.header("🔗 API Test & Data Viewer")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("Test DHAN API Connection")
+    
+    with col2:
+        if st.button("🧪 Test Connection", key="test_connection"):
+            with st.spinner("Testing API connection..."):
+                try:
+                    result = st.session_state.provider.test_connection()
+                    if result:
+                        st.success("✅ API Connection Successful!")
+                        st.balloons()
+                    else:
+                        st.error("❌ API Connection Failed")
+                        st.info("""
+                        **Troubleshooting:**
+                        1. Check DHAN_API_KEY in .env file
+                        2. Check DHAN_CLIENT_ID in .env file
+                        3. Verify internet connection
+                        4. Confirm API credentials are correct
+                        """)
+                except Exception as e:
+                    st.error(f"❌ Error: {str(e)}")
+    
+    st.markdown("---")
+    
+    # Fetch futures candles
+    st.subheader("📊 Fetch Futures Data")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        symbol = st.text_input("Symbol", "RELIANCE", help="NSE F&O stock symbol")
+    
+    with col2:
+        expiry = st.text_input("Expiry", "27NOV2026", help="Expiry date (e.g., 27NOV2026)")
+    
+    with col3:
+        if st.button("📥 Fetch Futures Candle", key="fetch_futures"):
+            with st.spinner(f"Fetching {symbol} {expiry} data..."):
+                try:
+                    candle = st.session_state.provider.get_futures_candle(symbol, expiry)
+                    if candle:
+                        col_a, col_b, col_c, col_d = st.columns(4)
+                        with col_a:
+                            st.metric("Close", f"₹{candle.close:.2f}")
+                        with col_b:
+                            st.metric("Volume", f"{candle.volume:,}")
+                        with col_c:
+                            st.metric("OI", f"{candle.oi:,}")
+                        with col_d:
+                            st.metric("Time", candle.timestamp.strftime("%H:%M:%S"))
+                        
+                        # Detailed data
+                        st.json({
+                            "Open": candle.open,
+                            "High": candle.high,
+                            "Low": candle.low,
+                            "Close": candle.close,
+                            "Volume": candle.volume,
+                            "OI": candle.oi,
+                            "Timestamp": candle.timestamp.isoformat(),
+                            "Expiry": candle.expiry
+                        })
+                    else:
+                        st.warning("❌ No data returned. Check:")
+                        st.info("""
+                        • Market is open (09:15 - 15:30 IST, Mon-Fri)
+                        • Symbol is valid NSE F&O stock
+                        • Expiry date exists and is correct
+                        """)
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+    
+    st.markdown("---")
+    
+    # Fetch options chain
+    st.subheader("💰 Fetch Options Chain Data")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        opt_symbol = st.text_input("Symbol", "RELIANCE", key="opt_symbol")
+    
+    with col2:
+        opt_expiry = st.text_input("Expiry", "27NOV2026", key="opt_expiry")
+    
+    with col3:
+        opt_strike = st.number_input("Strike", value=2900, step=100)
+    
+    with col4:
+        if st.button("📥 Fetch Options", key="fetch_options"):
+            with st.spinner(f"Fetching {opt_symbol} {opt_strike} options..."):
+                try:
+                    ce_data = st.session_state.provider.get_option_chain(opt_symbol, opt_expiry, opt_strike, "CE")
+                    pe_data = st.session_state.provider.get_option_chain(opt_symbol, opt_expiry, opt_strike, "PE")
+                    
+                    if ce_data and pe_data:
+                        col_ce, col_pe = st.columns(2)
+                        
+                        with col_ce:
+                            st.write("**CE (Call) Option**")
+                            col_a, col_b, col_c, col_d = st.columns(4)
+                            with col_a:
+                                st.metric("Close", f"₹{ce_data.close:.2f}")
+                            with col_b:
+                                st.metric("Volume", f"{ce_data.volume:,}")
+                            with col_c:
+                                st.metric("OI", f"{ce_data.oi:,}")
+                            with col_d:
+                                st.metric("IV", f"{ce_data.iv:.2f}" if hasattr(ce_data, 'iv') else "N/A")
+                        
+                        with col_pe:
+                            st.write("**PE (Put) Option**")
+                            col_a, col_b, col_c, col_d = st.columns(4)
+                            with col_a:
+                                st.metric("Close", f"₹{pe_data.close:.2f}")
+                            with col_b:
+                                st.metric("Volume", f"{pe_data.volume:,}")
+                            with col_c:
+                                st.metric("OI", f"{pe_data.oi:,}")
+                            with col_d:
+                                st.metric("IV", f"{pe_data.iv:.2f}" if hasattr(pe_data, 'iv') else "N/A")
+                        
+                        # Detailed JSON
+                        col_ce_json, col_pe_json = st.columns(2)
+                        with col_ce_json:
+                            st.write("CE Details:")
+                            st.json({
+                                "Open": ce_data.open,
+                                "High": ce_data.high,
+                                "Low": ce_data.low,
+                                "Close": ce_data.close,
+                                "Volume": ce_data.volume,
+                                "OI": ce_data.oi,
+                            })
+                        
+                        with col_pe_json:
+                            st.write("PE Details:")
+                            st.json({
+                                "Open": pe_data.open,
+                                "High": pe_data.high,
+                                "Low": pe_data.low,
+                                "Close": pe_data.close,
+                                "Volume": pe_data.volume,
+                                "OI": pe_data.oi,
+                            })
+                    else:
+                        st.warning("❌ No options data returned")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+
+
 def render_logs():
     """Render logs and diagnostics."""
     st.header("Logs & Diagnostics")
@@ -277,7 +435,7 @@ def main():
     # Sidebar navigation
     page = st.sidebar.radio(
         "Navigation",
-        ["Market Scanner", "Stock Detail", "Logs & Diagnostics", "Settings"]
+        ["Market Scanner", "Stock Detail", "API Test", "Logs & Diagnostics", "Settings"]
     )
     
     # Data quality indicator
@@ -295,6 +453,8 @@ def main():
         render_market_scanner()
     elif page == "Stock Detail":
         render_stock_detail()
+    elif page == "API Test":
+        render_api_test()
     elif page == "Logs & Diagnostics":
         render_logs()
     elif page == "Settings":
