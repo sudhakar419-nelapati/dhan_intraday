@@ -41,8 +41,9 @@ class BaselineCalculator:
                 sessions_by_date[date_key] = []
             sessions_by_date[date_key].append(candle)
         
-        # Sort by date
-        sorted_dates = sorted(sessions_by_date.keys(), reverse=True)
+        # Sort by date; the current session (last candle's date) must not be part of its own baseline
+        current_date = candles[-1].timestamp.date()
+        sorted_dates = sorted((d for d in sessions_by_date if d != current_date), reverse=True)
         
         # Return candles for the most recent lookback_sessions
         result = []

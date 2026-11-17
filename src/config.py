@@ -1,102 +1,87 @@
-"""
-Configuration management for STAR Trading Scanner.
-Loads from environment variables, .env file, or Streamlit secrets.
-"""
+"""Configuration for STAR Trading Scanner. Reads environment variables / .env / config/.env."""
+import logging
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
-import logging
 
-# Load environment variables from .env file (for local development)
-env_file = Path(__file__).parent.parent / ".env"
-if env_file.exists():
-    load_dotenv(env_file)
+ROOT = Path(__file__).resolve().parent.parent
+# Works whether the file sits in the project root, in config/, or in src/.
+for _f in (ROOT / "config" / ".env", ROOT / ".env", ROOT / "src" / ".env"):
+    if _f.exists():
+        load_dotenv(_f)
 
-# API Configuration - Support both local and Streamlit Cloud
-# Note: We DON'T import streamlit here to avoid initialization issues
-# Instead, we load from environment variables first, and dashboard.py handles secrets
-DHAN_API_KEY = os.getenv("DHAN_API_KEY", "")
-DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID", "")
 
-# Database Configuration
-DB_PATH = os.getenv("DB_PATH", "./data/scanner.db")
+def _first(*names, default=""):
+    for n in names:
+        v = os.getenv(n)
+        if v:
+            return v.strip().strip('"').strip("'")
+    return default
+
+
+def get_token() -> str:
+    """Read at call time so a token pasted in the dashboard is picked up."""
+    return _first("DHAN_ACCESS_TOKEN", "DHAN_API_KEY", "ACCESS_TOKEN")
+
+
+def get_client_id() -> str:
+    return _first("DHAN_CLIENT_ID", "CLIENT_ID")
+
+
+DB_PATH = os.getenv("DB_PATH", str(ROOT / "data" / "scanner.db"))
 Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+DATA_DIR = ROOT / "data"
+DATA_DIR.mkdir(exist_ok=True)
 
-# Session Times (IST)
 SESSION_START_TIME = os.getenv("SESSION_START_TIME", "09:15")
 SESSION_END_TIME = os.getenv("SESSION_END_TIME", "15:30")
 
-# Price and Volume Thresholds
 PRICE_NOISE_THRESHOLD = float(os.getenv("PRICE_NOISE_THRESHOLD", "0.0001"))
 VOLUME_RANK_STRONG = int(os.getenv("VOLUME_RANK_STRONG", "100"))
 VOLUME_RANK_MODERATE = int(os.getenv("VOLUME_RANK_MODERATE", "250"))
 VOLUME_RANK_WARNING = int(os.getenv("VOLUME_RANK_WARNING", "300"))
 
-# OI Strength Thresholds
 OI_STRENGTH_WEAK = float(os.getenv("OI_STRENGTH_WEAK", "1.0"))
-OI_STRENGTH_MEDIUM_LOW = float(os.getenv("OI_STRENGTH_MEDIUM_LOW", "1.4"))
+OI_STRENGTH_MEDIUM_LOW = float(os.getenv("OI_STRENGTH_MEDIUM_LOW", "1.0"))
 OI_STRENGTH_STRONG = float(os.getenv("OI_STRENGTH_STRONG", "1.4"))
 
-# Baseline Configuration
 BASELINE_LOOKBACK_SESSIONS = int(os.getenv("BASELINE_LOOKBACK_SESSIONS", "5"))
 NEUTRAL_BAND = float(os.getenv("NEUTRAL_BAND", "0.0"))
 
-# Universe Symbols
-UNIVERSE_SYMBOLS = os.getenv(
+# HDFC no longer trades as a stock future (merged into HDFCBANK).
+UNIVERSE_SYMBOLS = [s.strip().upper() for s in os.getenv(
     "UNIVERSE_SYMBOLS",
-    "RELIANCE,TCS,INFY,HDFC,ICICIBANK,AXISBANK,LT,WIPRO,MARUTI"
-).split(",")
+    "RELIANCE,TCS,INFY,HDFCBANK,ICICIBANK,AXISBANK,LT,WIPRO,MARUTI",
+).split(",") if s.strip()]
 
-# API Configuration
-API_TIMEOUT_SECONDS = int(os.getenv("API_TIMEOUT_SECONDS", "10"))
+API_TIMEOUT_SECONDS = int(os.getenv("API_TIMEOUT_SECONDS", "20"))
 API_RETRY_COUNT = int(os.getenv("API_RETRY_COUNT", "3"))
 API_RETRY_DELAY_SECONDS = int(os.getenv("API_RETRY_DELAY_SECONDS", "2"))
-MAX_CONCURRENT_SYMBOLS = int(os.getenv("MAX_CONCURRENT_SYMBOLS", "5"))
-
-# Data Quality
 MIN_OPTIONS_COVERAGE_PERCENT = int(os.getenv("MIN_OPTIONS_COVERAGE_PERCENT", "80"))
 
-# Logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-LOG_PATH = os.getenv("LOG_PATH", "./logs")
+LOG_PATH = os.getenv("LOG_PATH", str(ROOT / "logs"))
 Path(LOG_PATH).mkdir(parents=True, exist_ok=True)
 
-# Feature Flags
-PAPER_MODE = os.getenv("PAPER_MODE", "false").lower() == "true"
-ENABLE_HISTORICAL_REPLAY = os.getenv("ENABLE_HISTORICAL_REPLAY", "false").lower() == "true"
 
-
-def validate_config():
-    """Validate critical configuration parameters."""
+def validate_config() -> bool:
     errors = []
-    
-    if not DHAN_API_KEY or DHAN_API_KEY == "your_dhan_api_key_here":
-        errors.append("DHAN_API_KEY not configured properly")
-    
-    if not DHAN_CLIENT_ID or DHAN_CLIENT_ID == "your_dhan_client_id_here":
-        errors.append("DHAN_CLIENT_ID not configured properly")
-    
-    if not UNIVERSE_SYMBOLS:
-        errors.append("UNIVERSE_SYMBOLS is empty")
-    
+    if not get_token():
+        errors.append("access token missing (DHAN_ACCESS_TOKEN)")
+    if not get_client_id():
+        errors.append("DHAN_CLIENT_ID missing")
     if errors:
         logging.warning("Configuration warnings: " + "; ".join(errors))
         return False
-    
     return True
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Get a configured logger instance."""
-    logger = logging.getLogger(name)
-    logger.setLevel(LOG_LEVEL)
-    
-    if not logger.handlers:
-        handler = logging.FileHandler(f"{LOG_PATH}/{name}.log")
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-    
-    return logger
+    log = logging.getLogger(name)
+    log.setLevel(LOG_LEVEL)
+    if not log.handlers:
+        h = logging.FileHandler(f"{LOG_PATH}/{name.split('.')[-1]}.log")
+        h.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        log.addHandler(h)
+    return log

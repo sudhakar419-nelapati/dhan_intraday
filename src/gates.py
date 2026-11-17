@@ -305,24 +305,32 @@ class GatesCalculator:
             (readiness_status, readiness_description)
         """
         
-        pass_count = sum(1 for status, _ in gate_results.values() if status == "PASS")
-        total_gates = len(gate_results)
-        
-        # Check for strong opposite signals
-        has_opposite = any(status == "OPPOSITE" for status, _ in gate_results.values())
-        
-        if has_opposite:
+        # Gates still marked NOT_BUILT are ignored, so they can no longer inflate the count.
+        built = {k: v for k, v in gate_results.items() if v[0] != "NOT_BUILT"}
+        pass_count = sum(1 for status, _ in built.values() if status == "PASS")
+        total = len(built)
+
+        if any(status == "OPPOSITE" for status, _ in built.values()):
             return ("Exit / Stay out", "Strong opposite signal detected")
-        
-        if pass_count >= 8:
-            return ("Full-quantity readiness", "All 8 gates passed")
-        elif pass_count >= 6:
-            return ("Half-quantity readiness", f"{pass_count} gates passed (6-7)")
-        elif pass_count >= 4:
-            return ("Wait — one more gate needed", f"{pass_count} gates passed (4-5)")
-        else:
+        if total == 0:
+            return ("No data", "No gate could be evaluated")
+
+        if total == 8:
+            if pass_count >= 8:
+                return ("Full-quantity readiness", "All 8 gates passed")
+            if pass_count >= 6:
+                return ("Half-quantity readiness", f"{pass_count} gates passed (6-7)")
+            if pass_count >= 4:
+                return ("Wait - one more gate needed", f"{pass_count} gates passed (4-5)")
             return ("Stay out", f"Only {pass_count} gates passed (below 4)")
-    
+
+        # Partial build: judge only the gates that exist.
+        if pass_count == total:
+            return ("Futures aligned", f"{pass_count}/{total} built gates pass (options gates not built)")
+        if pass_count > 0:
+            return ("Wait", f"{pass_count}/{total} built gates pass")
+        return ("Stay out", f"0/{total} built gates pass")
+
     @staticmethod
     def evaluate_gate_1_oi_wall(
         chain: OptionChainSnapshot, side: str
@@ -332,7 +340,7 @@ class GatesCalculator:
         if not chain or chain.coverage_percent < MIN_OPTIONS_COVERAGE_PERCENT:
             return ("DATA_MISSING", "Insufficient options coverage")
         
-        return ("PASS", "OI wall detected and stable")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_gate_2_strike_gex(
@@ -342,7 +350,7 @@ class GatesCalculator:
         if not chain or chain.coverage_percent < MIN_OPTIONS_COVERAGE_PERCENT:
             return ("DATA_MISSING", "Coverage below 80%")
         
-        return ("PASS", "GEX calculation confirmed")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_gate_3_seller_neutral(
@@ -352,7 +360,7 @@ class GatesCalculator:
         if not chain:
             return ("DATA_MISSING", "No options data available")
         
-        return ("PASS", "Seller lead confirmed")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_gate_4_seller_exit(
@@ -366,7 +374,7 @@ class GatesCalculator:
             return ("DATA_MISSING", "No options data available")
         
         # Placeholder - needs implementation with actual threshold checking
-        return ("PASS", "Seller exit confirmed with valid thresholds")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_gate_5_writing(
@@ -376,7 +384,7 @@ class GatesCalculator:
         if not chain:
             return ("DATA_MISSING", "No options data available")
         
-        return ("PASS", "Writing activity detected")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_gate_6_buying(
@@ -386,7 +394,7 @@ class GatesCalculator:
         if not chain:
             return ("DATA_MISSING", "No options data available")
         
-        return ("PASS", "Buying activity detected")
+        return ("NOT_BUILT", "Not implemented yet")
     
     @staticmethod
     def evaluate_all_gates(
@@ -418,6 +426,10 @@ class GatesCalculator:
         gate_results[5] = GatesCalculator.evaluate_gate_5_writing(option_chain, side)
         gate_results[6] = GatesCalculator.evaluate_gate_6_buying(option_chain, side)
         
+        # Gates 1-6 are stubs until the option-chain logic exists: never let them count.
+        for g in range(1, 7):
+            gate_results[g] = ("NOT_BUILT", "Option-chain gate not built yet")
+
         # Gate 7: Futures direction
         if gate7_result and gate7_result.is_reliable:
             if side == "CE" and gate7_result.bias == "Bullish / CE":
