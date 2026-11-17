@@ -6,20 +6,32 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import logging
+import os
 
-from src.config import validate_config, get_logger
-from src.database import Database
-from src.provider import DhanAPIProvider
-from src.models import ScannerRowData
-from src.gates import Gate7Calculator, Gate8Calculator, GatesCalculator
-
-# Configure page
+# Configure page FIRST (before any other Streamlit commands)
 st.set_page_config(
     page_title="STAR Trading Scanner",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Now load configuration (after set_page_config)
+from src.config import validate_config, get_logger
+from src.database import Database
+from src.provider import DhanAPIProvider
+from src.models import ScannerRowData
+from src.gates import Gate7Calculator, Gate8Calculator, GatesCalculator
+
+# Try to get credentials from Streamlit secrets (for cloud deployment)
+try:
+    api_key = st.secrets.get("DHAN_API_KEY", "")
+    client_id = st.secrets.get("DHAN_CLIENT_ID", "")
+    if api_key and client_id:
+        os.environ["DHAN_API_KEY"] = api_key
+        os.environ["DHAN_CLIENT_ID"] = client_id
+except:
+    pass
 
 logger = get_logger(__name__)
 

@@ -13,15 +13,10 @@ if env_file.exists():
     load_dotenv(env_file)
 
 # API Configuration - Support both local and Streamlit Cloud
-try:
-    # Try Streamlit secrets (for Streamlit Cloud deployment)
-    import streamlit as st
-    DHAN_API_KEY = st.secrets.get("DHAN_API_KEY", os.getenv("DHAN_API_KEY", ""))
-    DHAN_CLIENT_ID = st.secrets.get("DHAN_CLIENT_ID", os.getenv("DHAN_CLIENT_ID", ""))
-except:
-    # Fallback to environment variables (for local development)
-    DHAN_API_KEY = os.getenv("DHAN_API_KEY", "")
-    DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID", "")
+# Note: We DON'T import streamlit here to avoid initialization issues
+# Instead, we load from environment variables first, and dashboard.py handles secrets
+DHAN_API_KEY = os.getenv("DHAN_API_KEY", "")
+DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID", "")
 
 # Database Configuration
 DB_PATH = os.getenv("DB_PATH", "./data/scanner.db")
