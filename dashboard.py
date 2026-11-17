@@ -139,7 +139,25 @@ def api_page(symbols):
             st.warning(f"No data. {provider().last_error or ''}")
 
 
+def password_gate():
+    """Cloud app is public by URL: ask for APP_PASSWORD (set in Streamlit secrets) before anything else."""
+    try:
+        pw = st.secrets.get("APP_PASSWORD", "")
+    except Exception:
+        pw = ""
+    if not pw or st.session_state.get("authed"):
+        return
+    entered = st.text_input("Password", type="password")
+    if entered and entered == pw:
+        st.session_state["authed"] = True
+        st.rerun()
+    if entered:
+        st.error("Wrong password")
+    st.stop()
+
+
 def main():
+    password_gate()
     with st.sidebar:
         st.subheader("Dhan credentials")
         cid = st.text_input("Client id", value=get_client_id())

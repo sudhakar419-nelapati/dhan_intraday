@@ -22,7 +22,7 @@ def _first(*names, default=""):
 
 def get_token() -> str:
     """Read at call time so a token pasted in the dashboard is picked up."""
-    return _first("DHAN_ACCESS_TOKEN", "DHAN_API_KEY", "ACCESS_TOKEN")
+    return _first("DHAN_ACCESS_TOKEN", "ACCESS_TOKEN")
 
 
 def get_client_id() -> str:
