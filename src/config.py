@@ -1,20 +1,27 @@
 """
 Configuration management for STAR Trading Scanner.
-Loads from environment variables and .env file.
+Loads from environment variables, .env file, or Streamlit secrets.
 """
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 import logging
 
-# Load environment variables from .env file
+# Load environment variables from .env file (for local development)
 env_file = Path(__file__).parent.parent / ".env"
 if env_file.exists():
     load_dotenv(env_file)
 
-# API Configuration
-DHAN_API_KEY = os.getenv("DHAN_API_KEY", "")
-DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID", "")
+# API Configuration - Support both local and Streamlit Cloud
+try:
+    # Try Streamlit secrets (for Streamlit Cloud deployment)
+    import streamlit as st
+    DHAN_API_KEY = st.secrets.get("DHAN_API_KEY", os.getenv("DHAN_API_KEY", ""))
+    DHAN_CLIENT_ID = st.secrets.get("DHAN_CLIENT_ID", os.getenv("DHAN_CLIENT_ID", ""))
+except:
+    # Fallback to environment variables (for local development)
+    DHAN_API_KEY = os.getenv("DHAN_API_KEY", "")
+    DHAN_CLIENT_ID = os.getenv("DHAN_CLIENT_ID", "")
 
 # Database Configuration
 DB_PATH = os.getenv("DB_PATH", "./data/scanner.db")
