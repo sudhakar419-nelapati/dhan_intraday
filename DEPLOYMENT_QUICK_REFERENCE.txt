@@ -1,0 +1,234 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                ║
+║              STREAMLIT CLOUD DEPLOYMENT - QUICK REFERENCE CARD                ║
+║                                                                                ║
+║           Your Custom URL: https://sudhakar419-star-scanner.streamlit.app/    ║
+║                                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ STEP-BY-STEP DEPLOYMENT (15 MINUTES)                                          ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+STEP 1: SIGN UP (2 minutes)
+└─ Go to: https://share.streamlit.io/
+└─ Click "Sign up" → "Continue with GitHub"
+└─ Authorize with: sudhakar419-nelapati
+
+STEP 2: DEPLOY (1 minute)
+└─ Click "New app"
+└─ Repository: sudhakar419-nelapati/dhan_intraday
+└─ Branch: main
+└─ Main file: dashboard.py
+└─ Click "Deploy"
+
+STEP 3: WAIT (2-5 minutes)
+└─ Watch deployment logs
+└─ App will show "Ready!" when complete
+└─ You'll get a temporary URL
+
+STEP 4: CUSTOM DOMAIN (1 minute)
+└─ Click ⚙️ Settings (top-right)
+└─ Find "Custom domain" option
+└─ Enter: sudhakar419-star-scanner
+└─ Click "Save"
+└─ Your URL: https://sudhakar419-star-scanner.streamlit.app/
+
+STEP 5: SECRETS (2 minutes) ⚠️ CRITICAL!
+└─ Click ☰ Hamburger menu
+└─ Click "Settings" → "Secrets"
+└─ Paste the following (copy from below):
+   ┌────────────────────────────────────────────────────────────────────────────┐
+   │ DHAN_API_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyUmVnaW9uIjoiU   │
+   │ jEiLCJpc3MiOiJkaGFuIiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzk1MDA2MjU2LCJpYXQ   │
+   │ iOjE3OTQ5MTk4NTYsInRva2VuQ29uc3VtZXJUeXBlIjoiU0VMRiIsIndlYmhvb2tVcmwi   │
+   │ OiIiLCJkaGFuQ2xpZW50SWQiOiIxMTA2NTIzODAwIn0.BEKwhfNBBQe9qekr6p91wGz_   │
+   │ VwZQvk1USCrXbpn23M6QpxbLBn5rxfgyybd2KsESKB6K2Oqdibgkwyr4d8RiDg          │
+   │                                                                            │
+   │ DHAN_CLIENT_ID=1106523800                                                 │
+   └────────────────────────────────────────────────────────────────────────────┘
+└─ Click "Save"
+└─ App automatically restarts
+
+STEP 6: TEST (3 minutes)
+└─ Visit: https://sudhakar419-star-scanner.streamlit.app/
+└─ Wait for dashboard to load
+└─ Check all 5 tabs work:
+   ✓ Overview (configuration)
+   ✓ Live Scanner (gate status)
+   ✓ Gate Details (calculations)
+   ✓ Session History (data)
+   ✓ API Test (connection check)
+└─ Test on mobile phone
+└─ Try "API Test" tab
+
+STEP 7: SHARE! 🎉
+└─ Share this URL: https://sudhakar419-star-scanner.streamlit.app/
+└─ Tell others: "Check out my STAR Trading Scanner!"
+└─ No installation needed - just the link
+└─ Works on desktop & mobile
+└─ Available 24/7
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ WHAT TO EXPECT                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+During Deployment:
+  ✓ Code is cloned from GitHub
+  ✓ Dependencies are installed
+  ✓ App starts up
+  ✓ You get a temporary URL
+  ✓ You can set custom domain
+  ✓ You add secrets
+  ✓ App restarts with secrets
+  ✓ Ready to use!
+
+After Deployment:
+  ✓ 5 tabs with trading analysis
+  ✓ Live market data (09:15-15:30 IST only)
+  ✓ Works from anywhere
+  ✓ Mobile friendly
+  ✓ HTTPS secure
+  ✓ 24/7 available
+  ✓ Updates auto-deploy from GitHub
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ COMMON ISSUES & QUICK FIXES                                                    ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+"API Connection FAILED"
+→ Go to: Settings → Secrets
+→ Check both credentials are there
+→ Save again, wait 30 seconds
+→ Refresh dashboard
+
+"Module not found" or "Import error"
+→ Make sure everything is pushed to GitHub
+→ Check all files are present
+→ Verify requirements.txt has all packages
+
+"No live data"
+→ Check time (09:15-15:30 IST only)
+→ Outside these hours, data may be empty
+→ Next trading day during market hours
+
+"App still loading"
+→ Refresh page (Ctrl+R)
+→ Wait 1-2 minutes
+→ Check Settings → Logs for errors
+→ Clear browser cache
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ IMPORTANT CREDENTIALS (FOR STEP 5)                                             ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+Your DHAN API credentials:
+
+Account ID: 1106523800
+
+API Key (JWT Token):
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyUmVnaW9uIjoiUjEiLCJpc3MiOiJkaGFu
+IiwicGFydG5lcklkIjoiIiwiZXhwIjoxNzk1MDA2MjU2LCJpYXQiOjE3OTQ5MTk4NTYsInRva2Vu
+Q29uc3VtZXJUeXBlIjoiU0VMRiIsIndlYmhvb2tVcmwiOiIiLCJkaGFuQ2xpZW50SWQiOiIxMTA2
+NTIzODAwIn0.BEKwhfNBBQe9qekr6p91wGz_VwZQvk1USCrXbpn23M6QpxbLBn5rxfgyybd2KsES
+KB6K2Oqdibgkwyr4d8RiDg
+
+Client ID:
+1106523800
+
+⚠️ KEEP THESE SECRET - Never share or commit to public repos!
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ YOUR DASHBOARD FEATURES                                                        ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📊 OVERVIEW TAB
+   Shows your STAR Scanner configuration and DHAN API status
+
+📈 LIVE SCANNER TAB
+   Real-time 8-gate STAR calculations with signal recommendations
+   (Data updates during market hours: 09:15-15:30 IST)
+
+🎯 GATE DETAILS TAB
+   Detailed calculations for each gate
+   Entry/exit prices, risk/reward ratios, statistics
+
+📋 SESSION HISTORY TAB
+   Historical data, past performance, trend analysis
+   Searchable database of all recorded sessions
+
+🔧 API TEST TAB
+   Test connection to DHAN API
+   Shows response time and status
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ QUICK FACTS                                                                    ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+✓ Hosting Cost: FREE
+✓ Domain: Yours (sudhakar419-star-scanner)
+✓ Uptime: 24/7
+✓ Security: HTTPS
+✓ Installation: None needed
+✓ Access: Browser + link
+✓ Mobile: Fully responsive
+✓ Deployment Time: 15 minutes
+✓ Maintenance: Automatic (Streamlit manages servers)
+✓ Code Updates: Auto-deploy when you push to GitHub
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ NEXT STEPS                                                                     ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+1. Open: https://share.streamlit.io/
+2. Follow 7 steps above (15 minutes)
+3. Test your deployed dashboard
+4. Share the URL with others
+5. Test live data during market hours (09:15-15:30 IST)
+6. Enjoy your public STAR Trading Scanner!
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ SUPPORT & RESOURCES                                                            ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+Streamlit Docs:        https://docs.streamlit.io/
+Streamlit Community:   https://discuss.streamlit.io/
+Your Repository:       https://github.com/sudhakar419-nelapati/dhan_intraday
+DHAN API:             https://dhan.in/api/
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║ FINAL CHECKLIST                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+Before you start deployment:
+  ☐ Internet connection working
+  ☐ GitHub account logged in (sudhakar419-nelapati)
+  ☐ 15 minutes available
+  ☐ You have this quick reference
+  ☐ You have the credentials (above)
+
+After deployment is complete:
+  ☐ Dashboard is live and accessible
+  ☐ All 5 tabs load correctly
+  ☐ You can access from mobile
+  ☐ You tested on a different device
+  ☐ You shared the URL with someone
+  ☐ You celebrated your success! 🎉
+
+
+════════════════════════════════════════════════════════════════════════════════
+
+                    You've got this! Deploy now! 🚀
+
+                 https://sudhakar419-star-scanner.streamlit.app/
+
+════════════════════════════════════════════════════════════════════════════════
